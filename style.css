@@ -1,0 +1,526 @@
+/* =====================================================
+   SPACE WEEK 2026 — style.css
+   All the looks live here. Change the colours in :root
+   and the whole site updates.
+   ===================================================== */
+
+/* ---------- 1. DESIGN TOKENS (colours, fonts) ---------- */
+:root {
+  --void:      #05070f;   /* deepest space */
+  --deep:      #0a1226;   /* dark blue */
+  --horizon:   #3aa0ff;   /* Earth atmosphere blue */
+  --glow:      #7fd8ff;   /* light cyan highlight */
+  --sun:       #ffc27a;   /* warm accent, used sparingly */
+  --text:      #e9effc;
+  --muted:     #a3b0cc;
+
+  --font-head: "Chakra Petch", "Segoe UI", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+}
+
+/* ---------- 2. RESET & BASE ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--void);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 1.0625rem;          /* 17px: readable on phones */
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+/* ---------- 3. SPACE BACKGROUND ---------- */
+.space {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--void) 0%, var(--deep) 70%, #0d1b3a 100%);
+}
+
+/* Star layers: tiny dots tiled across the screen and slowly drifting.
+   Three layers with different sizes/speeds give a feeling of depth. */
+.stars {
+  position: absolute;
+  inset: 0;
+  background-repeat: repeat;
+  animation: drift linear infinite;
+}
+.stars--far {
+  background-image:
+    radial-gradient(1px 1px at 20px 30px,  #fff, transparent),
+    radial-gradient(1px 1px at 90px 120px, #cfe6ff, transparent),
+    radial-gradient(1px 1px at 160px 60px, #fff, transparent);
+  background-size: 200px 200px;
+  opacity: .55;
+  animation-duration: 240s;
+}
+.stars--mid {
+  background-image:
+    radial-gradient(1.5px 1.5px at 50px 80px,   #fff, transparent),
+    radial-gradient(1.5px 1.5px at 210px 190px, #bfe3ff, transparent),
+    radial-gradient(1.5px 1.5px at 130px 250px, #fff, transparent);
+  background-size: 300px 300px;
+  opacity: .75;
+  animation-duration: 160s;
+}
+.stars--near {
+  background-image:
+    radial-gradient(2px 2px at 100px 150px, #fff, transparent),
+    radial-gradient(2px 2px at 320px 40px,  var(--glow), transparent);
+  background-size: 420px 420px;
+  animation-duration: 100s;
+}
+@keyframes drift {
+  from { background-position: 0 0; }
+  to   { background-position: -600px 600px; }
+}
+
+/* Soft colour clouds */
+.nebula {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(40% 35% at 18% 22%, rgba(80, 90, 220, .22), transparent 70%),
+    radial-gradient(35% 30% at 85% 35%, rgba(58, 160, 255, .14), transparent 70%);
+}
+
+/* Earth horizon: a huge circle, mostly below the screen */
+.earth {
+  position: absolute;
+  left: 50%;
+  bottom: -135vw;
+  width: 150vw;
+  height: 150vw;
+  max-width: 2200px;
+  max-height: 2200px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 0%, #1d4f9c 0%, #0c2552 35%, #060d20 70%);
+  box-shadow:
+    0 -2px 0 rgba(127, 216, 255, .9),            /* thin bright rim */
+    0 -10px 50px 6px rgba(58, 160, 255, .55),    /* atmosphere glow */
+    0 -50px 140px 20px rgba(58, 160, 255, .22);
+}
+
+/* The satellite crosses the sky slowly */
+.satellite {
+  position: absolute;
+  top: 18%;
+  left: -80px;
+  opacity: .85;
+  animation: orbit-pass 70s linear infinite;
+}
+@keyframes orbit-pass {
+  from { transform: translate(0, 0) rotate(8deg); }
+  to   { transform: translate(calc(100vw + 160px), -60px) rotate(8deg); }
+}
+
+/* ---------- 4. SCREENS ---------- */
+/* Every screen fills the page. Only the one with .is-active shows. */
+main { min-height: 100svh; display: grid; }
+
+.screen {
+  grid-area: 1 / 1;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.25rem 18vh;     /* extra bottom space keeps text above the Earth */
+  text-align: center;
+}
+.screen[hidden] { display: none; }
+
+/* Screen transitions (JS adds/removes these classes) */
+.screen.is-leaving  { animation: screen-out .6s ease forwards; }
+.screen.is-entering { animation: screen-in  .8s ease both; }
+
+@keyframes screen-out {
+  to { opacity: 0; transform: scale(1.06); filter: blur(6px); }
+}
+@keyframes screen-in {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ---------- 5. LANDING TEXT ---------- */
+.kicker {
+  margin: 0 0 1rem;
+  font-family: var(--font-head);
+  font-weight: 600;
+  letter-spacing: .38em;
+  font-size: .95rem;
+  color: var(--glow);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: clamp(2.6rem, 11vw, 6.5rem);   /* scales with screen width */
+  line-height: .98;
+  letter-spacing: .04em;
+  color: #fff;
+  text-shadow: 0 0 40px rgba(58, 160, 255, .45);
+}
+
+.tagline {
+  margin: 2rem 0 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: .15rem;
+  font-family: var(--font-head);
+  font-weight: 500;
+  font-size: clamp(1rem, 3.6vw, 1.35rem);
+  letter-spacing: .2em;
+  color: var(--muted);
+}
+.tagline span:last-child { color: var(--sun); }
+
+/* ---------- 6. BUTTONS ---------- */
+.btn {
+  appearance: none;
+  cursor: pointer;
+  min-height: 3.5rem;               /* big enough for thumbs */
+  padding: 0 2.25rem;
+  font-family: var(--font-head);
+  font-weight: 600;
+  font-size: 1.05rem;
+  letter-spacing: .16em;
+  color: #fff;
+  border-radius: 6px;
+  transition: transform .15s ease, box-shadow .2s ease, background .2s ease;
+}
+.btn:active { transform: scale(.97); }
+
+.btn--primary {
+  border: 1px solid var(--glow);
+  background: linear-gradient(180deg, rgba(58,160,255,.35), rgba(58,160,255,.12));
+  box-shadow: 0 0 0 0 rgba(127,216,255,.5), inset 0 0 18px rgba(127,216,255,.18);
+  animation: pulse 2.8s ease-in-out infinite;
+}
+.btn--primary:hover { background: linear-gradient(180deg, rgba(58,160,255,.55), rgba(58,160,255,.22)); }
+
+.btn--ghost {
+  border: 1px solid rgba(163,176,204,.5);
+  background: transparent;
+  color: var(--muted);
+}
+.btn--ghost:hover { color: #fff; border-color: var(--glow); }
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(127,216,255,.45), inset 0 0 18px rgba(127,216,255,.18); }
+  50%      { box-shadow: 0 0 0 10px rgba(127,216,255,0), inset 0 0 18px rgba(127,216,255,.18); }
+}
+
+/* Visible keyboard focus (accessibility) */
+:focus-visible {
+  outline: 3px solid var(--sun);
+  outline-offset: 3px;
+}
+
+/* ---------- 7. GLASS PANEL (used by placeholder + future screens) ---------- */
+.panel {
+  width: min(100%, 30rem);
+  padding: 2rem 1.5rem;
+  border: 1px solid rgba(127, 216, 255, .3);
+  border-radius: 14px;
+  background: rgba(10, 18, 38, .55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 0 40px rgba(58, 160, 255, .15);
+}
+.panel__title { margin: .5rem 0 1rem; font-family: var(--font-head); font-size: 2rem; letter-spacing: .08em; }
+.panel__text  { margin: 0 0 1.75rem; color: var(--muted); }
+
+.status {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: .6rem;
+  font-family: var(--font-head);
+  letter-spacing: .2em;
+  font-size: .85rem;
+  color: var(--glow);
+}
+.status__dot {
+  width: .6rem; height: .6rem; border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 10px #4ade80;
+}
+
+/* ---------- 8. BIGGER SCREENS ---------- */
+@media (min-width: 768px) {
+  .tagline { flex-direction: row; gap: 1.5rem; }
+  .screen  { padding-bottom: 14vh; }
+}
+
+/* ---------- 9. RESPECT "REDUCE MOTION" SETTING ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* =====================================================
+   PHASE 2 — CADET REGISTRATION
+   ===================================================== */
+
+/* A wider panel for the form */
+.panel--wide { width: min(100%, 36rem); text-align: left; }
+.panel--wide .panel__title { font-size: clamp(1.5rem, 6vw, 2.1rem); }
+
+/* ---------- Form fields ---------- */
+.field { margin: 0 0 1.4rem; padding: 0; border: 0; min-width: 0; }
+
+.field label,
+.field legend {
+  display: block;
+  margin-bottom: .5rem;
+  padding: 0;
+  font-family: var(--font-head);
+  font-weight: 600;
+  font-size: .95rem;
+  letter-spacing: .14em;
+  color: var(--glow);
+}
+
+.field input[type="text"] {
+  width: 100%;
+  min-height: 3.25rem;
+  padding: 0 1rem;
+  font: inherit;
+  font-size: 1.0625rem;              /* 16px+ stops iPhones zooming in */
+  color: var(--text);
+  background: rgba(5, 7, 15, .6);
+  border: 1px solid rgba(127, 216, 255, .35);
+  border-radius: 8px;
+}
+.field input[type="text"]::placeholder { color: #7f8cab; }
+.field input[type="text"]:focus-visible {
+  outline: 3px solid var(--sun);
+  outline-offset: 2px;
+  border-color: var(--glow);
+}
+.field input[aria-invalid="true"] { border-color: #ff9b8a; }
+
+/* Error text: always starts with a warning symbol, so it never relies on colour alone */
+.field__error { min-height: 1.4rem; margin: .4rem 0 0; font-size: .95rem; color: #ffb4a6; }
+.field__error:not(:empty)::before { content: "⚠ "; }
+
+/* ---------- Callsign cards (radio buttons that look like cards) ---------- */
+.callsigns__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: .75rem;
+}
+
+.callsign { position: relative; }
+
+/* The real radio button stays in the page (so keyboard + screen readers work)
+   but is visually hidden. The label next to it is what people see and tap. */
+.callsign input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+}
+
+.callsign label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 3.5rem;
+  margin: 0;
+  padding: 0 1rem;
+  font-family: var(--font-head);
+  font-weight: 600;
+  letter-spacing: .12em;
+  color: var(--text);
+  background: rgba(5, 7, 15, .5);
+  border: 1px solid rgba(163, 176, 204, .35);
+  border-radius: 8px;
+  transition: border-color .2s ease, background .2s ease, box-shadow .2s ease;
+}
+
+.callsign input:checked + label {
+  border-color: var(--glow);
+  background: rgba(58, 160, 255, .22);
+  box-shadow: 0 0 18px rgba(58, 160, 255, .35);
+}
+/* A tick mark shows the selection, so it is not only a colour change */
+.callsign input:checked + label::after { content: "✓"; color: var(--glow); font-size: 1.2rem; }
+
+.callsign input:focus-visible + label { outline: 3px solid var(--sun); outline-offset: 2px; }
+
+.btn--block { width: 100%; }
+
+/* ---------- Hub placeholder stats ---------- */
+.stats { margin: 0 0 1.5rem; display: grid; gap: .6rem; text-align: left; }
+.stats div { display: flex; justify-content: space-between; gap: 1rem;
+             padding-bottom: .6rem; border-bottom: 1px solid rgba(127,216,255,.18); }
+.stats dt { color: var(--muted); }
+.stats dd { margin: 0; font-family: var(--font-head); font-weight: 600; text-align: right; overflow-wrap: anywhere; }
+
+/* The registration form is tall, so let this screen start at the top on small phones */
+@media (max-width: 480px) {
+  #screen-register { justify-content: flex-start; padding-top: 1.5rem; }
+}
+@media (min-width: 768px) {
+  .callsigns__grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* =====================================================
+   PHASES 3–8 — HUB, MISSIONS, XP, BADGES, SOUND, RESPONSIVE
+   ===================================================== */
+
+.screen--top { justify-content: flex-start; padding-top: 3.5rem; padding-bottom: 8vh; }
+.center { text-align: center; margin: 2rem 0 0; }
+.btn--small { min-height: 2.75rem; padding: 0 1rem; font-size: .85rem; }
+
+.sound-toggle { position: fixed; top: .75rem; right: .75rem; z-index: 20; background: rgba(5,7,15,.75); }
+
+/* ---------- Hub ---------- */
+.hub, .mission { width: min(100%, 40rem); text-align: left; }
+.hub__head { text-align: center; margin-bottom: 1.25rem; }
+.hub__head .kicker { font-size: .75rem; letter-spacing: .22em; }
+.hub__title { margin: .3rem 0; font-family: var(--font-head); font-size: clamp(2rem, 9vw, 3rem); letter-spacing: .06em; }
+.hub__name { margin: 0; color: var(--muted); }
+
+.hud { width: 100%; margin-bottom: 1rem; padding: 1.25rem; }
+.hud__row { display: flex; justify-content: space-between; gap: 1rem; margin-bottom: .5rem;
+            font-family: var(--font-head); font-weight: 600; letter-spacing: .08em; }
+.hud__note { margin: 0 0 1.25rem; color: var(--muted); font-size: .95rem; }
+
+.bar { height: .9rem; margin-bottom: .5rem; overflow: hidden; border-radius: 99px; background: rgba(163,176,204,.2); }
+.bar__fill { width: 0; height: 100%; border-radius: 99px; transition: width 1.2s ease;
+             background: linear-gradient(90deg, var(--horizon), var(--glow)); box-shadow: 0 0 12px var(--glow); }
+
+.section-title { margin: 1.75rem 0 1rem; font-family: var(--font-head); font-size: 1rem; letter-spacing: .22em; color: var(--glow); }
+
+/* ---------- Mission map ---------- */
+.map { list-style: none; margin: 0; padding: 0; }
+.map li { position: relative; padding-bottom: 1.4rem; animation: screen-in .6s ease both; animation-delay: calc(var(--i) * 90ms); }
+.map li:not(:last-child)::after {              /* the dotted path between missions */
+  content: ""; position: absolute; left: 2.75rem; top: 5.2rem; bottom: .15rem; width: 0;
+  border-left: 2px dashed rgba(127, 216, 255, .35);
+}
+
+.node {
+  display: grid; grid-template-columns: 4rem 1fr; grid-template-areas: "icon day" "icon title" "icon status";
+  column-gap: 1rem; align-items: center; width: 100%; min-height: 5.2rem; padding: .8rem 1rem; text-align: left;
+  font: inherit; color: var(--text); cursor: pointer;
+  background: rgba(10, 18, 38, .6); border: 1px solid rgba(163,176,204,.3); border-radius: 12px;
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+}
+.node__icon   { grid-area: icon; display: grid; place-items: center; width: 3.5rem; height: 3.5rem; font-size: 1.8rem;
+                border-radius: 50%; border: 1px solid rgba(127,216,255,.4); background: rgba(5,7,15,.6); }
+.node__day    { grid-area: day; font-size: .8rem; letter-spacing: .2em; color: var(--muted); }
+.node__title  { grid-area: title; font-family: var(--font-head); font-weight: 700; font-size: 1.15rem; letter-spacing: .08em; }
+.node__status { grid-area: status; font-size: .9rem; letter-spacing: .1em; }
+
+.node--open { border-color: var(--glow); box-shadow: 0 0 22px rgba(58,160,255,.3); }
+.node--open .node__status { color: var(--sun); }
+.node--done { border-color: rgba(74, 222, 128, .6); }
+.node--done .node__status { color: #86efac; }
+.node--locked { cursor: not-allowed; opacity: .6; }
+.node--locked .node__icon { filter: grayscale(1); }
+.node:not(:disabled):hover { background: rgba(58,160,255,.18); }
+
+/* ---------- Badges ---------- */
+.badges { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr)); gap: .75rem; }
+.badge-card { display: flex; flex-direction: column; align-items: center; gap: .35rem; padding: 1rem .5rem; text-align: center;
+              border: 1px dashed rgba(163,176,204,.4); border-radius: 12px; background: rgba(10,18,38,.5); color: var(--muted); }
+.badge-card__icon  { font-size: 2.2rem; }
+.badge-card__name  { font-family: var(--font-head); font-weight: 600; font-size: .85rem; letter-spacing: .1em; }
+.badge-card__state { font-size: .8rem; letter-spacing: .12em; }
+.badge-card--owned { border: 1px solid var(--sun); color: var(--text); box-shadow: 0 0 18px rgba(255,194,122,.25); background: rgba(255,194,122,.08); }
+.badge-card--new { width: 12rem; margin: 0 auto 1.25rem; padding: 1.5rem 1rem; animation: badge-pop .9s cubic-bezier(.2,1.4,.4,1) .4s both; }
+.badge-card--new .badge-card__icon { font-size: 3.5rem; }
+@keyframes badge-pop { from { opacity: 0; transform: scale(.3) rotate(-12deg); } to { opacity: 1; transform: none; } }
+
+/* ---------- Mission screen ---------- */
+.mission__bar { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1.25rem; }
+.mission__xp { margin: 0; font-family: var(--font-head); font-weight: 600; letter-spacing: .12em; color: var(--sun); }
+.mission .kicker { margin-bottom: .4rem; font-size: .8rem; }
+.mission .panel__title { font-size: clamp(1.3rem, 5.5vw, 1.9rem); }
+.stage { width: 100%; padding: 1.5rem 1.25rem; }
+.stage--in { animation: screen-in .5s ease both; }
+.stage .btn { margin-top: 1rem; max-width: 100%; }
+
+.transmission { margin: 0 0 1rem; font-family: var(--font-head); font-weight: 600; letter-spacing: .2em; font-size: .9rem; color: var(--glow); }
+.transmission::first-letter { animation: blink 1.2s steps(2) infinite; color: #ff7a6b; }
+@keyframes blink { 50% { opacity: .2; } }
+.tx { margin: 0 0 .9rem; font-size: 1.1rem; }
+.objective { margin: 1.25rem 0 0; padding: .75rem 1rem; border-left: 3px solid var(--sun); background: rgba(255,194,122,.08); font-family: var(--font-head); font-weight: 600; letter-spacing: .06em; }
+.objective__label { font-size: .75rem; letter-spacing: .2em; color: var(--sun); }
+.clue { margin: 0 0 1rem; padding: .75rem 1rem; border-left: 3px solid var(--glow); background: rgba(127,216,255,.07); }
+.clue p { margin: 0 0 .5rem; } .clue p:last-child { margin: 0; }
+.question { margin: 1.25rem 0 .9rem; font-family: var(--font-head); font-size: 1.25rem; letter-spacing: .04em; }
+
+.telemetry { margin: 0; padding: 1rem; border: 1px solid rgba(127,216,255,.3); border-radius: 10px; background: rgba(5,7,15,.6); font-family: var(--font-head); }
+.telemetry__row { display: flex; justify-content: space-between; gap: 1rem; padding: .45rem 0; border-bottom: 1px solid rgba(127,216,255,.12); letter-spacing: .08em; }
+.telemetry__row:last-child { border: 0; }
+.telemetry dt { color: var(--muted); } .telemetry dd { margin: 0; font-weight: 600; text-align: right; }
+
+.choices { display: grid; gap: .75rem; }
+.choice { min-height: 3.5rem; padding: .75rem 1rem; text-align: left; font-family: var(--font-head); font-weight: 600; font-size: 1rem; letter-spacing: .08em; color: var(--text); cursor: pointer;
+          background: rgba(5,7,15,.55); border: 1px solid rgba(127,216,255,.4); border-radius: 8px; }
+.choice:hover { background: rgba(58,160,255,.22); border-color: var(--glow); }
+.choice:active { transform: scale(.98); }
+
+.alert { margin: 1rem 0 0; padding: .9rem 1rem; border-radius: 8px; border: 1px solid; }
+.alert__title { margin: 0; font-family: var(--font-head); font-weight: 700; letter-spacing: .1em; }
+.alert__text { margin: .4rem 0 0; }
+.alert--good { border-color: #4ade80; background: rgba(74,222,128,.1); }
+.alert--good .alert__title::before { content: "✓ "; }
+.alert--warn { border-color: #ffb4a6; background: rgba(255,120,100,.1); }
+.alert--warn .alert__title::before { content: "⚠ "; }
+
+.cipher { margin: 1rem 0; padding: 1rem; text-align: center; font-family: "Courier New", monospace; font-weight: 700; font-size: clamp(1.4rem, 7vw, 2rem);
+          letter-spacing: .25em; color: var(--glow); border: 1px dashed var(--glow); border-radius: 8px; background: rgba(5,7,15,.6); overflow-wrap: anywhere; }
+
+/* Completion screen */
+.complete__icon { margin: 0; text-align: center; font-size: 3.5rem; animation: badge-pop .9s ease both; }
+.complete__title { margin: .25rem 0; text-align: center; font-family: var(--font-head); font-size: clamp(1.8rem, 8vw, 2.6rem); letter-spacing: .1em; }
+.complete__line { margin: 0 0 .75rem; text-align: center; font-family: var(--font-head); letter-spacing: .12em; color: var(--glow); }
+.complete__xp { margin: 0 0 1.25rem; text-align: center; font-family: var(--font-head); font-weight: 700; font-size: 2.2rem; color: var(--sun); }
+.stage .complete__icon ~ p:not(.complete__line):not(.complete__xp):not(.transmission):not(.clue) { text-align: center; }
+.stage .transmission { text-align: center; }
+.stage .btn--primary:last-child, .stage > .btn { display: flex; margin-left: auto; margin-right: auto; align-items: center; justify-content: center; }
+
+/* XP pop-up */
+.toast { position: fixed; left: 50%; top: 4.5rem; z-index: 30; padding: .6rem 1.2rem; border-radius: 99px; pointer-events: none;
+         font-family: var(--font-head); font-weight: 700; letter-spacing: .1em; color: #05070f; background: var(--sun); opacity: 0; transform: translate(-50%, 0); }
+.toast--show { animation: toast 1.8s ease both; }
+@keyframes toast { 0% { opacity: 0; transform: translate(-50%, 10px); } 15%, 70% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -14px); } }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 380px) {
+  .node { grid-template-columns: 3.4rem 1fr; padding: .7rem; }
+  .node__icon { width: 3rem; height: 3rem; }
+  .map li:not(:last-child)::after { left: 2.2rem; }
+  .sound-toggle { font-size: .75rem; padding: 0 .6rem; }
+}
+@media (min-width: 768px) {
+  .map li:nth-child(even) { margin-left: 3rem; }
+  .map li:nth-child(even)::after { left: 5.75rem; }
+  .choices { grid-template-columns: 1fr 1fr; }
+  .stage { padding: 2rem; }
+}
+@media (min-width: 1280px) { .hub, .mission { width: 44rem; } }
+
+/* =====================================================
+   SINGLE-MISSION VERSION — extra styles
+   (The hub, map, badge and registration styles above are no longer used. They are harmless.)
+   ===================================================== */
+.recap { margin: 1.25rem 0; padding: 1rem 1.1rem; border: 1px solid rgba(127,216,255,.3); border-radius: 10px; background: rgba(5,7,15,.5); }
+.recap__title { margin: 0 0 .6rem; font-family: var(--font-head); font-weight: 700; letter-spacing: .18em; font-size: .9rem; color: var(--glow); }
+.recap ul { margin: 0; padding-left: 1.2rem; }
+.recap li { margin-bottom: .5rem; }
+.complete__center { text-align: center; margin: 0 0 .5rem; }
